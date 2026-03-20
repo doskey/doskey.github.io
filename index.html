@@ -1,5 +1,537 @@
-<html>
-    <body>
-        silence is gold.
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doskey Lee</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --text: #e8e8e8;
+            --dim: #555;
+            --accent: #00ff88;
+            --accent2: #ff3366;
+            --glow: rgba(0, 255, 136, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px, rgba(0, 0, 0, 0.08) 4px
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 998;
+        }
+
+        .canvas { position: fixed; inset: 0; z-index: 0; }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 32px;
+        }
+
+        /* HERO */
+        .hero { margin-bottom: 96px; }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 800;
+            letter-spacing: -3px;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 .glitch {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero h1 .glitch::before,
+        .hero h1 .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .hero h1 .glitch::before {
+            color: var(--accent);
+            animation: glitch-1 3s infinite linear alternate-reverse;
+            clip-path: inset(0 0 65% 0);
+        }
+
+        .hero h1 .glitch::after {
+            color: var(--accent2);
+            animation: glitch-2 3s infinite linear alternate-reverse;
+            clip-path: inset(65% 0 0 0);
+        }
+
+        @keyframes glitch-1 {
+            0%, 92% { transform: translate(0); }
+            93% { transform: translate(-4px, 2px); }
+            94% { transform: translate(2px, -1px); }
+            95% { transform: translate(-1px, 2px); }
+            96%, 100% { transform: translate(0); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 90% { transform: translate(0); }
+            91% { transform: translate(3px, -2px); }
+            92% { transform: translate(-2px, 1px); }
+            93% { transform: translate(1px, -1px); }
+            94%, 100% { transform: translate(0); }
+        }
+
+        .hero .sub {
+            font-size: 0.95rem;
+            color: var(--dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            line-height: 1.6;
+        }
+
+        .hero .sub span { color: var(--accent); text-shadow: 0 0 10px var(--glow); }
+
+        /* SECTIONS */
+        .section {
+            margin-bottom: 72px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.6s forwards;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.3s; }
+        .section:nth-child(5) { animation-delay: 0.4s; }
+        .section:nth-child(6) { animation-delay: 0.5s; }
+        .section:nth-child(7) { animation-delay: 0.6s; }
+
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        .section-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0.3;
+        }
+
+        /* About */
+        .about p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 16px;
+            color: #bbb;
+        }
+
+        .about .highlight {
+            color: var(--text);
+            border-bottom: 1px solid var(--accent);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .stat {
+            background: rgba(0, 255, 136, 0.03);
+            border: 1px solid rgba(0, 255, 136, 0.08);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(0, 255, 136, 0.08);
+        }
+
+        .stat .num {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat .label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Timeline */
+        .timeline { list-style: none; position: relative; }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 8px; bottom: 8px;
+            width: 1px;
+            background: linear-gradient(180deg, var(--accent), var(--accent2));
+            opacity: 0.3;
+        }
+
+        .timeline li {
+            padding-left: 24px;
+            margin-bottom: 24px;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .timeline li::before {
+            content: '';
+            position: absolute;
+            left: -3px; top: 8px;
+            width: 7px; height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--glow);
+        }
+
+        .timeline li:last-child::before {
+            background: var(--accent2);
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.3);
+        }
+
+        .timeline .period { color: var(--dim); font-size: 0.75rem; display: block; margin-bottom: 2px; }
+        .timeline .title { color: var(--text); }
+        .timeline .place { color: var(--accent); opacity: 0.7; }
+        .timeline .desc { color: var(--dim); font-size: 0.8rem; margin-top: 4px; display: block; }
+
+        /* Domains */
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .domain-item {
+            background: rgba(0, 255, 136, 0.03);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            padding: 16px;
+            transition: all 0.3s;
+            cursor: default;
+        }
+
+        .domain-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .domain-item .domain-name {
+            font-size: 0.85rem;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .domain-item .domain-desc {
+            font-size: 0.7rem;
+            color: var(--dim);
+        }
+
+        /* Interests */
+        .interests-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .interest-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #888;
+            padding: 8px 0;
+            transition: color 0.3s;
+        }
+
+        .interest-item:hover { color: var(--text); }
+        .interest-item .icon { font-size: 1.2rem; width: 28px; text-align: center; }
+
+        /* Links */
+        .links { display: flex; gap: 32px; }
+
+        .links a {
+            color: var(--dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 1px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .links a:hover { color: var(--accent); }
+        .links a:hover::after { width: 100%; }
+
+        .footer {
+            margin-top: 100px;
+            padding-top: 24px;
+            border-top: 1px solid #111;
+            font-size: 0.7rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer .quote { font-style: italic; }
+
+        @media (max-width: 600px) {
+            .container { padding: 60px 20px; }
+            .hero h1 { letter-spacing: -2px; }
+            .interests-grid { grid-template-columns: 1fr; }
+            .domain-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .footer { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="canvas" id="bg"></canvas>
+
+    <div class="container">
+        <div class="hero">
+            <h1><span class="glitch" data-text="DOSKEY LEE">DOSKEY LEE</span></h1>
+            <div class="sub"><span>serial founder</span> · product leader · builder</div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">About</div>
+            <div class="about">
+                <p>I build products and businesses around <span class="highlight">major technology shifts</span>. Over 20+ years across cybersecurity, mobile internet, crypto, and AI — combining deep technical judgment with product vision, execution, and commercialization.</p>
+                <p>From low-level Windows security and endpoint defense, to global mobile consumer products, developer monetization platforms, crypto trading systems, and AI-native physical products. My work has consistently focused on <span class="highlight">turning complex technologies into scalable user value</span> and real business outcomes.</p>
+                <p>Multiple companies founded. Products scaled to <span class="highlight">100M+ users</span>. Shipped across China, US, Singapore, Hong Kong. One acquisition, one IPO ride, and always building what's next.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Numbers</div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="num">20+</span>
+                    <span class="label">Years Shipping</span>
+                </div>
+                <div class="stat">
+                    <span class="num">100M+</span>
+                    <span class="label">Users Reached</span>
+                </div>
+                <div class="stat">
+                    <span class="num">1M+</span>
+                    <span class="label">AI Photos Generated</span>
+                </div>
+                <div class="stat">
+                    <span class="num">4</span>
+                    <span class="label">Companies Built</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Journey</div>
+            <ul class="timeline">
+                <li>
+                    <span class="period">2004 — 2007</span>
+                    <span class="title">Senior Engineer →</span> <span class="place">Rorsoft</span>
+                </li>
+                <li>
+                    <span class="period">2007 — 2008</span>
+                    <span class="title">Core Engineer →</span> <span class="place">Qihoo 360</span>
+                </li>
+                <li>
+                    <span class="period">2008 — 2012</span>
+                    <span class="title">Senior Manager →</span> <span class="place">Comodo</span>
+                </li>
+                <li>
+                    <span class="period">2012 — 2016</span>
+                    <span class="title">Senior Director →</span> <span class="place">Cheetah Mobile</span>
+                </li>
+                <li>
+                    <span class="period">2016 — 2020</span>
+                    <span class="title">Founder & CEO →</span> <span class="place">AppCooking</span>
+                </li>
+                <li>
+                    <span class="period">2019 — 2022</span>
+                    <span class="title">Head of BU →</span> <span class="place">LinkSure (WiFi Master Key)</span>
+                </li>
+                <li>
+                    <span class="period">2022 — 2025</span>
+                    <span class="title">Product & Business Lead →</span> <span class="place">Pionex</span>
+                </li>
+                <li>
+                    <span class="period">2025 — 2026</span>
+                    <span class="title">Founder & CEO →</span> <span class="place">Pixel Flux</span>
+                </li>
+                <li>
+                    <span class="period">Now</span>
+                    <span class="title">What's next?</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Domains</div>
+            <div class="domain-grid">
+                <div class="domain-item">
+                    <div class="domain-name">AI & AIGC</div>
+                    <div class="domain-desc">Image generation, on-device inference, multi-agent systems, AI-native product architectures</div>
+                </div>
+                <div class="domain-item">
+                    <div class="domain-name">Product & Growth</div>
+                    <div class="domain-desc">0→1 product building, user acquisition, monetization at scale, global go-to-market</div>
+                </div>
+                <div class="domain-item">
+                    <div class="domain-name">Crypto & Fintech</div>
+                    <div class="domain-desc">Trading systems, structured products, token operations, exchange product strategy</div>
+                </div>
+                <div class="domain-item">
+                    <div class="domain-name">Mobile & Consumer</div>
+                    <div class="domain-desc">Global app portfolios, media utilities, content platforms across SEA, LATAM, MENA</div>
+                </div>
+                <div class="domain-item">
+                    <div class="domain-name">Security & Systems</div>
+                    <div class="domain-desc">Kernel development, endpoint defense, reverse engineering, OS internals</div>
+                </div>
+                <div class="domain-item">
+                    <div class="domain-name">Hardware & IoT</div>
+                    <div class="domain-desc">Device management, embedded systems, autonomous terminals, maker hardware</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Beyond Work</div>
+            <div class="interests-grid">
+                <div class="interest-item"><span class="icon">🏎️</span> Porsche 911 GTS</div>
+                <div class="interest-item"><span class="icon">🎮</span> Gaming</div>
+                <div class="interest-item"><span class="icon">📺</span> Anime</div>
+                <div class="interest-item"><span class="icon">🔧</span> Maker Hardware</div>
+                <div class="interest-item"><span class="icon">🏭</span> Supply Chain Sims</div>
+                <div class="interest-item"><span class="icon">🧩</span> Model Kits</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">Links</div>
+            <div class="links">
+                <a href="https://github.com/doskey">GitHub</a>
+                <a href="https://x.com/doskey">𝕏</a>
+                <a href="https://www.linkedin.com/in/doskey/">LinkedIn</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span class="quote">"silence is gold"</span>
+            <span>doskey.net</span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bg');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles;
+
+        function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
+
+        function init() {
+            resize();
+            particles = [];
+            const count = Math.floor((w * h) / 12000);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                    r: Math.random() * 1.5 + 0.5, a: Math.random() * 0.3 + 0.05
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, w, h);
+            for (const p of particles) {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(0, 255, 136, ${p.a})`;
+                ctx.fill();
+            }
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 255, 136, ${0.06 * (1 - dist / 100)})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        addEventListener('resize', resize);
+        init();
+        draw();
+    </script>
+</body>
 </html>
