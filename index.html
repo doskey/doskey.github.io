@@ -8,6 +8,8 @@
     <meta name="keywords" content="Doskey Lee, 李丁盼, serial founder, product leader, AI, AIGC, Cheetah Mobile, AppCooking, Pixel Flux, Pionex, startup founder, builder">
     <meta name="author" content="Doskey Lee">
     <link rel="canonical" href="https://doskey.net/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <meta name="robots" content="index, follow">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
@@ -15,12 +17,16 @@
     <meta property="og:description" content="20+ years building products across cybersecurity, mobile, crypto, and AI. 100M+ users reached. Multiple companies founded.">
     <meta property="og:url" content="https://doskey.net/">
     <meta property="og:site_name" content="Doskey Lee">
+    <meta property="og:image" content="https://doskey.net/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@doskey">
     <meta name="twitter:title" content="Doskey Lee — Serial Founder, Product Leader & Builder">
     <meta name="twitter:description" content="20+ years building products across cybersecurity, mobile, crypto, and AI. 100M+ users reached. Multiple companies founded.">
+    <meta name="twitter:image" content="https://doskey.net/og-image.png">
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -369,7 +375,7 @@
             padding-top: 24px;
             border-top: 1px solid #111;
             font-size: 0.7rem;
-            color: #333;
+            color: #555;
             display: flex;
             justify-content: space-between;
         }
@@ -529,56 +535,71 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('bg');
-        const ctx = canvas.getContext('2d');
-        let w, h, particles;
+        (function() {
+            const canvas = document.getElementById('bg');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles, rafId;
 
-        function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
+            function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
 
-        function init() {
-            resize();
-            particles = [];
-            const count = Math.floor((w * h) / 12000);
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: Math.random() * w, y: Math.random() * h,
-                    vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
-                    r: Math.random() * 1.5 + 0.5, a: Math.random() * 0.3 + 0.05
-                });
-            }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, w, h);
-            for (const p of particles) {
-                p.x += p.vx; p.y += p.vy;
-                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(0, 255, 136, ${p.a})`;
-                ctx.fill();
-            }
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 100) {
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(0, 255, 136, ${0.06 * (1 - dist / 100)})`;
-                        ctx.stroke();
-                    }
+            function init() {
+                resize();
+                particles = [];
+                const count = Math.min(Math.floor((w * h) / 12000), 300);
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * w, y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+                        r: Math.random() * 1.5 + 0.5, a: Math.random() * 0.3 + 0.05
+                    });
                 }
             }
-            requestAnimationFrame(draw);
-        }
 
-        addEventListener('resize', resize);
-        init();
-        draw();
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                for (const p of particles) {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 255, 136, ${p.a})`;
+                    ctx.fill();
+                }
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distSq = dx * dx + dy * dy;
+                        if (distSq < 10000) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(0, 255, 136, ${0.06 * (1 - Math.sqrt(distSq) / 100)})`;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                rafId = requestAnimationFrame(draw);
+            }
+
+            let resizeTimer;
+            addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(resize, 150);
+            });
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    cancelAnimationFrame(rafId);
+                } else {
+                    rafId = requestAnimationFrame(draw);
+                }
+            });
+
+            init();
+            draw();
+        })();
     </script>
 </body>
 </html>
