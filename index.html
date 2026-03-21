@@ -129,7 +129,10 @@
         .hero h1 .glitch {
             position: relative;
             display: inline-block;
+            color: #d0ffe8;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
         }
+
 
         .hero h1 .glitch::before,
         .hero h1 .glitch::after {
@@ -141,32 +144,32 @@
 
         .hero h1 .glitch::before {
             color: var(--accent);
-            animation: glitch-1 3s infinite linear alternate-reverse;
-            clip-path: inset(0 0 65% 0);
+            opacity: 0;
+            animation: glitch-1 4s infinite linear alternate-reverse;
             text-shadow: 0 0 20px var(--glow);
         }
 
         .hero h1 .glitch::after {
             color: var(--accent2);
-            animation: glitch-2 3s infinite linear alternate-reverse;
-            clip-path: inset(65% 0 0 0);
+            opacity: 0;
+            animation: glitch-2 4s infinite linear alternate-reverse;
             text-shadow: 0 0 20px rgba(255, 51, 102, 0.15);
         }
 
         @keyframes glitch-1 {
-            0%, 92% { transform: translate(0); }
-            93% { transform: translate(-4px, 2px); }
-            94% { transform: translate(2px, -1px); }
-            95% { transform: translate(-1px, 2px); }
-            96%, 100% { transform: translate(0); }
+            0%, 92% { transform: translate(0); opacity: 0; }
+            93% { transform: translate(-3px, 1px); opacity: 0.4; }
+            94% { transform: translate(2px, -1px); opacity: 0.3; }
+            95% { transform: translate(-1px, 2px); opacity: 0.4; }
+            96%, 100% { transform: translate(0); opacity: 0; }
         }
 
         @keyframes glitch-2 {
-            0%, 90% { transform: translate(0); }
-            91% { transform: translate(3px, -2px); }
-            92% { transform: translate(-2px, 1px); }
-            93% { transform: translate(1px, -1px); }
-            94%, 100% { transform: translate(0); }
+            0%, 90% { transform: translate(0); opacity: 0; }
+            91% { transform: translate(3px, -1px); opacity: 0.4; }
+            92% { transform: translate(-2px, 1px); opacity: 0.3; }
+            93% { transform: translate(1px, -1px); opacity: 0.4; }
+            94%, 100% { transform: translate(0); opacity: 0; }
         }
 
         .hero .sub {
